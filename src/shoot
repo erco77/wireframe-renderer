@@ -6,22 +6,38 @@ comp=comp-$FRAME.png
 small=small-comp-$FRAME.png
 tcode=timecode-small-comp-$FRAME.png
 
+# Capture screenshot as $out
 until screencapture -l $FLTK_WIN_ID $out; do
     echo RETRYING every 3 secs
     sleep 3
 done
-
 echo Created raw image $out
+
+# Add neon glow to image
+#    Clone the image, blur it, composite the blur with the original vector
+#
 convert $out \
       \( +clone -blur 0x25 -level 0%,50% \) \
       -compose screen \
       -composite \
       $comp
 echo Created: $comp
+
+# Remove the original screenshot
 /bin/rm -f $out
+
+# Scale down the neon glow comp 50%
+#    This decreases the jaggies from the FLTK render
+#
 convert $comp -scale 50% $small
 echo Created: $small
+
+# Add a frame# to the image at lower right
 ./framestamp $small $tcode
 echo Created: $tcode
+
+# Show the resulting 3 images + file size
 ls -la $comp $small $tcode
+
+# Date stamp (for determining per-frame render time)
 echo "Done: `date`"
