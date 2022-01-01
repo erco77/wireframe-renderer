@@ -1,0 +1,15 @@
+> Fix lookat: not centering if window's width is different than height
+
+> Fix lookat: seems to be an inverted matrix?
+  Putting an object at the lookat position doesn't work,
+  you have to put it at the negative position, e.g. -x,-y,-z
+  for it to be seen.
+
+> See images/Makefile for how to add a neon glow to the wireframe image:
+
+	grid-0001.png -- input
+	comp-0001.png -- output
+
+> Implement a way to screencapture + process each frame on mac using new Fl_Window::get_win_id() feature
+  Done: Added get_win_id branch on fltk fork at: https://github.com/erco77/fltk/
+

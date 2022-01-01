@@ -1,0 +1,223 @@
+References below:
+    https://www.3dgep.com/understanding-the-view-matrix/
+    https://www.cs.helsinki.fi/group/goa/viewing/viewtransf/viewTrans.html
+    https://docs.microsoft.com/en-us/windows/uwp/graphics-concepts/view-transform
+    https://www.scratchapixel.com/lessons/mathematics-physics-for-computer-graphics/lookat-function
+
+----------------------------------------------------------------------------
+https://www.3dgep.com/understanding-the-view-matrix/
+
+    Transformations
+    ---------------
+
+    When rendering a scene in 3D space, there are usually 3 transformations 
+    that are applied to the 3D geometry in the scene:
+
+        > World Transform
+          ---------------
+          The world transform (or sometimes referred to as the object
+          transform or model matrix) will transform a models vertices (and
+          normals) from object space (this is the space that the model was
+          created in using a 3D content creation tool like 3D Studio Max or
+          Maya) into world space.  World space is the position, orientation
+          (and sometimes scale) that positions the model in the correct
+          place in the world.
+
+        > View Transform
+          --------------
+          The world space vertex positions (and normals) need to be
+          transformed into a space that is relative to the view of the
+          camera. This is called “view space” (sometimes referred to
+          “camera space”) and is the transformation that will be studied
+          in this article.
+
+        > Projection Transform
+          --------------------
+          Vertices that have been transformed into view space need to be
+          transformed by the projection transformation matrix into a space
+          called “clip space”. This is the final space that the graphics
+          programmer needs to worry about. The projection transformation
+          matrix will not be discussed in this article.
+
+----
+        https://www.cs.helsinki.fi/group/goa/viewing/viewtransf/viewTrans.html
+    
+        ViewPlane: The window is defined in this plane:
+            > The origin of this plane is the eye position: e = (e.x, e.y, e.z)
+            > The unit vector to this plane is the 'view plane normal': N->
+            > Another vector called the 'viewup vector': V->  (which perpendicular to N->)
+    
+        For perspective views, the view plane normal as a unit vector
+        from the eye to the lookat point is given by:
+
+     . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+    
+             lookat = a   // aka "to"
+             eye    = e   // aka "from"
+     (1)     dir    = (a-e) = dir.xyz(a.x - e.x, a.y - e.y, a.z - e.z)
+             
+     . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+             Here 'length' is the magnitude length of the eye-to-lookat vector.
+	     The 2D version is:
+
+                                         eye
+                                          o
+                                          |\
+                                          | \  length
+                                       x  |  \
+				          |   \
+				          o____o
+                                             y  lookat
+
+             So basically, Pythagoras on the x,y,z difference between eye and lookat, e.g.
+
+                                    ______________________________________________
+     (2)     length = ||a-e|| =    / (a.x - e.x)^2 + (a.y - e.y)^2 + (a.z - e.z)^2
+                                 \/  \_________/     \_________/     \_________/
+                                        dir.x           dir.y            dir.z
+	     - or -
+
+	     in C++: length = sqrt( (dir.x * dir.x) + (dir.y * dir.y) + (dir.z * dir.z) );
+
+     . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+	     Now we want a unit vector (0..1) version of dir, called N->,
+	     which is basically each component of dir divided by its magnitude 'length':
+
+     (3)     N-> =   ( 1 / ||a-e|| ) * (a.x - e.x, a.y - e.y, a.z - e.z)
+                           \_____/      \_______/  \_______/  \_______/
+                            length        dir.x      dir.y      dir.z
+
+	     - or -
+
+	     in C++: 
+	          Point3D N;
+	          N.xyz( dir.x / length, dir.y / length, dir.z / length);
+
+     . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+    
+        The 'view up' vector is the tilt (rotation) of camera eye
+    
+    >> We can see the above in Camera::Recalc() where we calculate the precomputed "view_plane_normal"
+
+    {
+        // Direction from camera's eye to the lookat point as a distance vector -erco
+        Point3D direction(_lookAt.x() - _position.x(),
+                          _lookAt.y() - _position.y(),                  // (1)
+                          _lookAt.z() - _position.z());
+
+        float length = sqrt((direction.x() * direction.x()) +
+                            (direction.y() * direction.y()) +           // (2)
+                            (direction.z() * direction.z()));
+
+        precomp_view_plane_normal.xyz(direction.x() / length,
+                                      direction.y() / length,           // (3)
+                                      direction.z() / length);
+    }
+
+----------------------------------------------------------------------------------------------------
+
+In Camera::pointToView():
+ XXX Something is maybe wrong here..
+     It rotates the view at an odd angle.
+     Check against: https://docs.microsoft.com/en-us/windows/uwp/graphics-concepts/view-transform
+     Also: https://www.scratchapixel.com/lessons/mathematics-physics-for-computer-graphics/lookat-function
+
+     Since the behavior involves flipping around, I'm wondering if we're missing
+     a normalization somewhere, because adjusting camera position + lookAt equally
+     doesn't behave as expected, e.g.:
+
+               x=0        x=10       x=20
+
+               cam        cam        cam
+   z=1          o          o          o
+
+                |          |          |
+               \|/        \|/        \|/
+                v          v          v
+
+   z=-1         o          o          o
+             lookat     lookat      lookat
+
+ """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+ Ref: https://www.cs.helsinki.fi/group/goa/viewing/viewtransf/viewTrans.html
+ Uses the left-hand "UVN" system of vectors:
+     Vector
+     ------
+       V     The Y axis of view coord.
+             The perpendicular projection of V(up) on the view plane
+       U     The X axis of view coord.
+             Orthogonal (90deg angle) to V and N, i.e. U = V x N
+       N     The Z axis of view coord.
+             Increases in positive direction with depth of a point from the eye.
+ """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    
+    //
+    //
+    //                      _                          _
+    //                     |  -1.00, 0.00,  0.00, 0.00  |
+    //        View Matrix  |   0.00, 1.00,  0.00, 0.00  |    <-- based on camera pos + lookat
+    //                     |   0.00, 0.00, -1.00, 0.00  |
+    //                     |_  0.00, 0.00,  0.00, 1.00 _|
+    //                      _        _
+    //                     |   25.00  |
+    //    World Space Obj  |   25.00  |                     <-- world object position
+    //                     |  -27.00  |                         (before view matrix applied)
+    //                     |_   1.00 _|
+    //                      _        _
+    //                     |  -25.00  |
+    //     View Space Obj  |   25.00  |
+    //                     |   27.00  |
+    //                     |_   1.00 _|
+
+
+----------------------------------------------------------------------------------------------
+
+https://www.scratchapixel.com/lessons/mathematics-physics-for-computer-graphics/lookat-function
+
+Matrix44f lookAt(const Vec3f& from, const Vec3f& to, const Vec3f& tmp = Vec3f(0, 1, 0))
+{
+    Vec3f forward = normalize(from - to);
+    Vec3f right = crossProduct(normalize(tmp), forward);
+    Vec3f up = crossProduct(forward, right);
+
+    Matrix44f camToWorld;
+
+    camToWorld[0][0] = right.x;
+    camToWorld[0][1] = right.y;
+    camToWorld[0][2] = right.z;
+    camToWorld[1][0] = up.x;
+    camToWorld[1][1] = up.y;
+    camToWorld[1][2] = up.z;
+    camToWorld[2][0] = forward.x;
+    camToWorld[2][1] = forward.y;
+    camToWorld[2][2] = forward.z;
+
+    camToWorld[3][0] = from.x;
+    camToWorld[3][1] = from.y;
+    camToWorld[3][2] = from.z;
+
+    return camToWorld;
+}
+
+The Look-At Method Limitation
+
+    The method is very simple and works generally well.
+
+    Though it has an Achilles heels (a weakness).
+
+    When the camera is vertical looking straight down or straight up,
+    the forward axis gets very close to the arbitrary axis used to
+    compute the right axis. 
+
+    The extreme case is of course when the forward axis and this arbitrary axis
+    are perfectly parallel e.g. when the forward vector is either (0,1,0) or (0,-1,0).
+    Unfortunately in this particular case, the cross product fails producing 
+    a result for the right vector. There is actually no real solution to this problem.
+    You can either detect this case and choose to set the vectors by hand 
+    (since you know what the configuration of the vectors should be anyway).
+    A more elegant solution can be developed using quaternion interpolation.
+
+
+
