@@ -1,6 +1,11 @@
 #!/usr/bin/python
 import os,sys,re
 
+#
+# Burns an image's frame# into an output COPY of the image
+#     Does not modify the original image.
+#
+
 def ParseSequence(filename, ext):
     '''Return the pathname and frame# part of a sequence's filename.
        Returns (None,None) if could not be determined.
@@ -31,7 +36,7 @@ if __name__ == "__main__":
 
     infile =sys.argv[1]
     outfile=sys.argv[2]
-    font   = "routed-gothic-narrow"
+    font   = "routed-gothic-narrow"		# .ttf exists on harris - https://usemodify.com/fonts/routed-gothic-font/
     xoff   = 50
     yoff   = 50
 
@@ -42,13 +47,4 @@ if __name__ == "__main__":
 
     os.system('convert %s -gravity southeast -fill red -font %s -pointsize 28 -annotate +%d+%d "%s" %s' % \
         (infile, font, xoff,yoff, frm, outfile))
-
-"""
-    image.jpg -set filename:name '%t' ^
-    ( -clone 0 -bordercolor "#000000" -border 10x10 ) ^
-    ( -clone 0 -filter cubic -resize 3300x3300 -negate -crop 2500x3300 +repage -blur 0x10 ) ^
-    -delete 0 -gravity center -compose over -composite ^
-    -gravity southwest -fill red -font arial -pointsize 28 -annotate +0+0 "%[filename:name]" ^
-    "%[filename:name]_labeled.jpg"
-"""
 

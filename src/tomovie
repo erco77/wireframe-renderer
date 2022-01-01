@@ -9,11 +9,12 @@ crop_h=370
 infile=timecode-small-comp-%04d.png
 outfile=small-out.mp4
 
-ffmpeg -y -r 30 \
-       -start_number 10 -i $infile \
-       -c:v libx264 \
+# Convert infile images to a 30fps .mp4 that can be played in e.g. QuickTime player
+ffmpeg -y -r 30 						\
+       -start_number 10 -i $infile 				\
+       -c:v libx264 						\
        -filter:v "crop=${crop_w}:${crop_h}:${crop_x}:${crop_y}" \
-       -r 30 \
-       -pix_fmt yuv420p \
+       -r 30 							\
+       -pix_fmt yuv420p 					\
        -an $outfile
 
