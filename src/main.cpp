@@ -6,8 +6,9 @@
 // Much thanks to: https://github.com/njustesen/3D-Engine
 //
 // 1.0 - Nov 2012 njustesen @ github - Initial implementation
-// 1.1 - Dec 2021 erco@seriss.com - Cleanup, removed SDL, added output driver for tek4010 rendering
-// 1.2 - Jan 2022 erco@seriss.com - More cleanup, added more output drivers: vt100, fltk, fltkcairo
+// 1.1 - Dec 25 2021 erco@seriss.com - Cleanup, removed SDL, added output driver for tek4010 rendering
+// 1.2 - Jan 01 2022 erco@seriss.com - More cleanup, added more output drivers: vt100, fltk, fltkcairo
+// 1.3 - Jan 01 2022 erco@seriss.com - Added animation features
 //
 // There's a good tektronix 4010 emulator (used for initial development): 
 // https://github.com/rricharz/Tek4010
