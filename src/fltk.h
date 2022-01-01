@@ -10,3 +10,4 @@ void init_FLTK(DrawCallback *drawcb);             // init FLTK, set draw callbac
 void apploop_FLTK();                              // init FLTK, set draw callback
 void DrawLine_FLTK(int x1,int y1,int x2,int y2);  // Draw a line in FLTK window
 void Redraw_FLTK(float fps);                      // trigger a redraw
+void SetPostRenderCommand_FLTK(const char *cmd);  // sets a post render command

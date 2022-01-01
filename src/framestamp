@@ -1,0 +1,54 @@
+#!/usr/bin/python
+import os,sys,re
+
+def ParseSequence(filename, ext):
+    '''Return the pathname and frame# part of a sequence's filename.
+       Returns (None,None) if could not be determined.
+       Example:
+              file: "/path/foo.01234.exr"
+               ext: ".exr"
+           Returns: ( "/path/foo.", "01234" )
+    '''
+    # Focus on the part we don't want (frm# and .ext)..
+    # ..then return the part we want (everything preceding)
+    try:
+        framestr = re.search("([0-9]*)"+ext+"$", filename).groups()[0]  # "/path/foo.0123.ext" -> "0123"
+        basepath = filename[:-len(framestr+ext)]                        # "/path/foo.0123.ext" -> "/path/foo."
+        return (basepath, framestr)
+    except:
+        return (None,None)
+
+
+
+#
+# MAIN: Test the module
+#
+if __name__ == "__main__":
+
+    if len(sys.argv) != 3:
+	print("usage: %s infile outfile" % sys.argv[0])
+	sys.exit(1)
+
+    infile =sys.argv[1]
+    outfile=sys.argv[2]
+    font   = "routed-gothic-narrow"
+    xoff   = 50
+    yoff   = 50
+
+    (path,frm) = ParseSequence(infile, ".png")
+    print(" IN: %s" % infile)
+    print("OUT: %s" % outfile)
+    print("FRM: %s" % frm)
+
+    os.system('convert %s -gravity southeast -fill red -font %s -pointsize 28 -annotate +%d+%d "%s" %s' % \
+        (infile, font, xoff,yoff, frm, outfile))
+
+"""
+    image.jpg -set filename:name '%t' ^
+    ( -clone 0 -bordercolor "#000000" -border 10x10 ) ^
+    ( -clone 0 -filter cubic -resize 3300x3300 -negate -crop 2500x3300 +repage -blur 0x10 ) ^
+    -delete 0 -gravity center -compose over -composite ^
+    -gravity southwest -fill red -font arial -pointsize 28 -annotate +0+0 "%[filename:name]" ^
+    "%[filename:name]_labeled.jpg"
+"""
+

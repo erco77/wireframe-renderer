@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# Width and height must be factor of 2
+crop_x=25
+crop_y=50
+crop_w=674
+crop_h=370
+
+infile=timecode-small-comp-%04d.png
+outfile=small-out.mp4
+
+ffmpeg -y -r 30 \
+       -start_number 10 -i $infile \
+       -c:v libx264 \
+       -filter:v "crop=${crop_w}:${crop_h}:${crop_x}:${crop_y}" \
+       -r 30 \
+       -pix_fmt yuv420p \
+       -an $outfile
+

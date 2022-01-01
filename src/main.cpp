@@ -377,7 +377,6 @@ int main(int argc, char* args[])
     init_VT100();       // Initialize rendering
     while (1 ) { draw(); fflush(stdout); usleep(100000); } // draw objects
     return 0;
-}
 #endif
 
 #ifdef RENDER_TEK4010
@@ -396,6 +395,7 @@ int main(int argc, char* args[])
     init_3D();         // Initialize 3D stuff
     init_FLTK(draw);   // init fltk (creates window)
     Redraw_FLTK(30.0); // enable redrawing (for animation) in FPS
+    SetPostRenderCommand_FLTK("./shoot");
     apploop_FLTK();    // FLTK uses an event loop for showing window + calling draw()
     return 0;
 }

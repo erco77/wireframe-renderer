@@ -1,0 +1,27 @@
+#!/bin/sh
+echo SHOOTING FRAME $FRAME
+echo Window ID is $FLTK_WIN_ID
+out=out-$FRAME.png
+comp=comp-$FRAME.png
+small=small-comp-$FRAME.png
+tcode=timecode-small-comp-$FRAME.png
+
+until screencapture -l $FLTK_WIN_ID $out; do
+    echo RETRYING every 3 secs
+    sleep 3
+done
+
+echo Created raw image $out
+convert $out \
+      \( +clone -blur 0x25 -level 0%,50% \) \
+      -compose screen \
+      -composite \
+      $comp
+echo Created: $comp
+/bin/rm -f $out
+convert $comp -scale 50% $small
+echo Created: $small
+./framestamp $small $tcode
+echo Created: $tcode
+ls -la $comp $small $tcode
+echo "Done: `date`"
