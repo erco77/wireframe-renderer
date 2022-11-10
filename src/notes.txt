@@ -1,3 +1,19 @@
+> Add scope rendering
+
+	Need to add window clipping -- see tek
+
+	Should probably generate one .wav file per frame from "main"
+	e.g. out.0001.wav, out.0002.wav, etc.
+
+	Then later, "shoot" them with a shoot script that:
+
+		1. Opens the camera shutter
+		2. Plays the .wav file to the scope to trace out the image
+		3. Closes the camera shutter
+
+	A test program that generates e.g. a circle and cross over and over
+	might be good.
+
 > Fix lookat: not centering if window's width is different than height
 
 > Fix lookat: seems to be an inverted matrix?
@@ -13,3 +29,8 @@
 > Implement a way to screencapture + process each frame on mac using new Fl_Window::get_win_id() feature
   Done: Added get_win_id branch on fltk fork at: https://github.com/erco77/fltk/
 
+> Not sure, but I think TransformHandler needs a 'translate' operation.
+  Currently translations can be applied directly to DrawableObject and Point3D.
+
+> Create a test-tek4010 app to draw an X on the tek4010 terminal.
+  (All the other output drivers have test programs.. this one should too)

@@ -2,8 +2,8 @@
 
 #pragma once
 
-#define VT100_SCREEN_XMAX 600 //126  // 600
-#define VT100_SCREEN_YMAX 150 //125  // 150
+#define VT100_SCREEN_XMAX 300
+#define VT100_SCREEN_YMAX 124
 
 void init_VT100();
 void Clear_VT100();

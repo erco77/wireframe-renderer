@@ -34,6 +34,18 @@
 //#define RENDER_FLTKCAIRO
 //..etc..
 
+#ifdef RENDER_SCOPE
+    #include "scope.h"
+    //
+    // Oscilloscope/WAV File Rendering - Renders vectors to .wav file
+    //                                   Note: the screen space is HUGE; full signed 16bit numbers.
+    //
+    #define     SCREEN_WIDTH    1000    // Lets use unsigned 0 .. 65535
+    #define     SCREEN_HEIGHT   1000    // since we're used to this.
+    #define     SCREEN_XOFF     0
+    #define     SCREEN_YOFF     0   // -32767
+#endif
+
 #ifdef RENDER_VT100
     #include "vt100.h"
     //
@@ -41,12 +53,12 @@
     //                   Works "well" with tiny font + large window size (e.g. 600x150)
     //                   Impractical for realtime animation (too lores, slow, etc)
     //
-    const int   SCREEN_WIDTH  = VT100_SCREEN_XMAX;      // set in vt100.h
-    const int   SCREEN_HEIGHT = VT100_SCREEN_YMAX;
-    const float SCREEN_XSCALE = 1.0;
-    const float SCREEN_YSCALE = 1.0;                    // ascii characters are tall + thin, so squish the Y axis
-    const int   SCREEN_XOFF   = 200;
-    const int   SCREEN_YOFF   = 50;
+    #define     SCREEN_WIDTH    VT100_SCREEN_XMAX       // set in vt100.h
+    #define     SCREEN_HEIGHT   VT100_SCREEN_YMAX 
+    #define     SCREEN_XSCALE   1.0 
+    #define     SCREEN_YSCALE   0.3                     // ascii characters are tall + thin, so squish the Y axis
+    #define     SCREEN_XOFF     0   // 200 
+    #define     SCREEN_YOFF     0   // 50 
 #endif
 
 #ifdef RENDER_TEK4010
@@ -65,18 +77,21 @@
     const int   SCREEN_YOFF   = 50;
 #endif
 
+    // I YAM HERE - CHANGE EVERYTHING TO USE #define's
+    //              SO WE CAN CHECK REALTIME SIZE OF WINDOW, ETC
+
 #ifdef RENDER_FLTK
     #include "fltk.h"
     //
     // FLTK Rendering - Realtime rendering in FLTK
     //                  Can be used for TD'ing animation, can easily render 30fps and higher..
     //
-    const int   SCREEN_WIDTH  = FLTK_SCREEN_XMAX;       // set in fltk.h
-    const int   SCREEN_HEIGHT = FLTK_SCREEN_YMAX;
-    const float SCREEN_XSCALE = 1.0;
-    const float SCREEN_YSCALE = 1.0;
-    const int   SCREEN_XOFF   = 0;
-    const int   SCREEN_YOFF   = 0;
+    #define SCREEN_WIDTH   FLTK_SCREEN_XMAX       // set in fltk.h
+    #define SCREEN_HEIGHT  FLTK_SCREEN_YMAX
+    // NO SCREEN_XSCALE
+    // NO SCREEN_YSCALE
+    #define SCREEN_XOFF    0
+    #define SCREEN_YOFF    0
 #endif
 
 #ifdef RENDER_FLTKCAIRO
@@ -104,7 +119,7 @@ static DrawableObject *lookat = 0;         // lookat cube
 #include "MakeCube.cpp"
 
 // Initialize our 3D stuff
-void init_3D()
+void Init_3D()
 {
     // Initialize Camera
     //
@@ -159,7 +174,9 @@ void init_3D()
     objects = new vector<DrawableObject*>();
 
     // Create grid
-    #define SQUARESIZE 1000
+    //     I used 1000 for the squaresize value for the first neon render.
+    //
+    #define SQUARESIZE 500
     #define SQZ2 (SQUARESIZE/2.0)
     {
         // Make a single 100x100 square as a quad on the XY plane
@@ -183,14 +200,18 @@ void init_3D()
             square.addQuad(new Quad(p0,p1,p2,p3));
         }
 
+
         // Now make copies of the quad all over a grid in world space
-        for ( int x=-60000; x<60000; x+=SQUARESIZE ) {
-            for ( int y=-60000; y<60000; y+=SQUARESIZE ) {
-                DrawableObject *qcopy = new DrawableObject(square);    // instance the square
-                qcopy->translate(x, y,  3000);    // -z puts object out in front of camera
+        //    I used 60000 for the final neon renders (first animation test)
+        //
+        for ( int x=-30000; x<30000; x+=SQUARESIZE ) {
+            for ( int y=-30000; y<30000; y+=SQUARESIZE ) {
+                DrawableObject *qcopy = new DrawableObject(square);  // instance the square
+                qcopy->translate(x, y,  3000);                       // -z puts object out in front of camera
                 objects->push_back(qcopy);
             }
         }
+
     }
 
     // Create a 'lookat' cube LAST
@@ -223,17 +244,35 @@ void init_3D()
 
 void DrawLine(int x1, int y1, int x2, int y2)
 {
-    // Apply scale
+    //printf(" PRECLIP: %d, %d, %d, %d\n", x1, y1, x2, y2);
+#ifdef SCREEN_XSCALE
+    // Apply scale (if render driver defined any)
     x1 *= SCREEN_XSCALE; y1 *= SCREEN_YSCALE;
     x2 *= SCREEN_XSCALE; y2 *= SCREEN_YSCALE;
+#endif
+
     // Apply offset
     x1 += SCREEN_XOFF; y1 += SCREEN_YOFF;
     x2 += SCREEN_XOFF; y2 += SCREEN_YOFF;
 
+    // Full line clip
+    if ( x1 < 0 && x2 < 0 ) return;
+    if ( y1 < 0 && y2 < 0 ) return;
+    if ( x1 > SCREEN_WIDTH  && x2 > SCREEN_WIDTH  ) return;
+    if ( y1 > SCREEN_HEIGHT && y2 > SCREEN_HEIGHT ) return;
+
     // Draw actual line
     //    These functions are to handle window clipping lines themselves.
     //
+    #if RENDER_SCOPE
+    DrawLine_SCOPE(x1, y1, x2, y2);
+    #endif
     #if RENDER_VT100
+    // Flash-render lines
+    //printf("\033[1m"); DrawLine_VT100(x1, y1, x2, y2); fflush(stdout); usleep(50000); printf("\033[0m");
+    //DrawLine_VT100(x1, y1, x2, y2); fflush(stdout);
+
+    // Regular drawing
     DrawLine_VT100(x1, y1, x2, y2);
     #endif
     #if RENDER_TEK4010
@@ -247,29 +286,10 @@ void DrawLine(int x1, int y1, int x2, int y2)
     #endif
 }
 
-//void drawObject(DrawableObject *_object)
-//{
-//    unsigned int i;
-//    for (i = 0; i < _object->triangles()->size(); i++) {
-//        Triangle *t = _object->triangle(i);
-//        DrawLine(t->x1(), t->y1(), t->x2(), t->y2());
-//        DrawLine(t->x2(), t->y2(), t->x3(), t->y3());
-//        DrawLine(t->x3(), t->y3(), t->x1(), t->y1());
-//    }
-//    for (i = 0; i < _object->quads()->size(); i++) {
-//        Quad *q = _object->quad(i);
-//        DrawLine(q->x1(), q->y1(), q->x2(), q->y2());
-//        DrawLine(q->x2(), q->y2(), q->x3(), q->y3());
-//        DrawLine(q->x3(), q->y3(), q->x4(), q->y4());
-//        DrawLine(q->x4(), q->y4(), q->x1(), q->y1());
-//    }
-//}
-
-static TransformHandler transformHandler;
-
 void draw()
 {
     // Update the screen
+    printf("draw() called\n");
 
     #ifdef RENDER_VT100
     Clear_VT100();
@@ -325,6 +345,7 @@ void draw()
         if ( i == find ) { once = false; }
     }
 
+
     {
         //// Move lookat a little each frame
         static float xadj = 2;
@@ -344,46 +365,35 @@ void draw()
         static char once = 0;
         if ( !once ) { once = 1; printf("Animating lookat on x,y step: %.2f %.2f\n", xadj, yadj); }
     }
-/**
-    {
-        //// Move camera a little each frame
-        float yadj = 10;
-        camera.translate(0, yadj, 0);
-        //camera.xyzLookAtTranslate(0, yadj, 0); // this should work but doesn't?
-        static char once = 0;
-        if ( !once ) { once = 1; printf("Animating camera on y, step: %.2f\n", yadj); }
-    }
-**/
-
-    // Change camera lookat
-    //camera.setLookAt(camera.getLookAt().x()+50,
-    //                 camera.getLookAt().y(),
-    //                 camera.getLookAt().z());
-
-//  // If we're going to draw another frame (FLTK), move objects slightly for animation
-//  // float angle = 1.0/(30.0*4) * (M_PI*2);  // at 30fps, 1 rot per 4secs
-//  for (i=0; i<objects->size(); i++) {
-//      DrawableObject *dobj = objects->at(i);
-//      //transformHandler.translateObject(dobj, -5, 0.0, 0.0);  // nudge all quads along -X axis (towards camera)
-//      dobj->position(dobj->positionX() - 5,         // nudge object along -X axis
-//                     dobj->positionY() + 0,
-//                     dobj->positionZ() + 0);
-//  }
 }
+
+#ifdef RENDER_SCOPE
+int main(int argc, char* args[])
+{
+    Init_3D();              // Initialize 3D stuff
+    Init_SCOPE("out.wav");  // Initialize rendering
+    SetStepRate_SCOPE(400); // step rate for line drawing
+    // while (1) { draw(); }
+    draw();     // draw 1 frame, exit
+    return 0;
+}
+#endif
 
 #ifdef RENDER_VT100
 int main(int argc, char* args[])
 {
-    init_3D();          // Initialize 3D stuff
+    Init_3D();          // Initialize 3D stuff
     init_VT100();       // Initialize rendering
-    while (1 ) { draw(); fflush(stdout); usleep(100000); } // draw objects
+    //draw();           // draw once
+    while (1) { draw(); fflush(stdout); usleep(100000); } // animate
     return 0;
+}
 #endif
 
 #ifdef RENDER_TEK4010
 int main(int argc, char* args[])
 {
-    init_3D();         // Initialize 3D stuff
+    Init_3D();         // Initialize 3D stuff
     init_TEK4010();    // init the tek4010
     draw();            // Draw objects
     return 0;
@@ -393,11 +403,11 @@ int main(int argc, char* args[])
 #ifdef RENDER_FLTK
 int main(int argc, char* args[])
 {
-    init_3D();         // Initialize 3D stuff
-    init_FLTK(draw);   // init fltk (creates window)
-    Redraw_FLTK(30.0); // enable redrawing (for animation) in FPS
-    SetPostRenderCommand_FLTK("./shoot");
-    apploop_FLTK();    // FLTK uses an event loop for showing window + calling draw()
+    Init_3D();         // Initialize 3D stuff
+    Init_FLTK(draw);   // init fltk (creates window)
+//XXX    Redraw_FLTK(30.0); // enable redrawing (for animation) in FPS
+//XXX    SetPostRenderCommand_FLTK("./shoot");
+    AppLoop_FLTK();    // FLTK uses an event loop for showing window + calling draw()
     return 0;
 }
 #endif
@@ -405,7 +415,7 @@ int main(int argc, char* args[])
 #ifdef RENDER_FLTKCAIRO
 int main(int argc, char* args[])
 {
-    init_3D();              // Initialize 3D stuff
+    Init_3D();              // Initialize 3D stuff
     Init_FLTKCAIRO(draw);   // init fltk (creates window)
     Redraw_FLTKCAIRO(30.0); // enable redrawing (for animation) in FPS
     AppLoop_FLTKCAIRO();    // FLTK uses an event loop for showing window + calling draw()

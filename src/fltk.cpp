@@ -40,6 +40,7 @@ public:
         Fl_Double_Window::draw();       // let window draw itself (black)
         fl_color(FL_WHITE);             // draw with white lines
         fl_color(0x40ff4000);           // oops, no, green
+	printf("fltk::draw() called, draw_cb is %p\n", _draw_cb);
         if ( _draw_cb ) {     		// invoke caller's draw callback
 	    _draw_cb();
             static int frame = 0;
@@ -47,7 +48,7 @@ public:
 	    if ( _post_render_cmd != "" ) {
 	        static char winid_env[40];
 	        static char frame_env[40];
-	        sprintf(winid_env, "FLTK_WIN_ID=%d", get_win_id()); putenv(winid_env); // can be used by 'screencapture -l'
+//XXX:	        sprintf(winid_env, "FLTK_WIN_ID=%d", get_win_id()); putenv(winid_env); // can be used by 'screencapture -l'
 	        sprintf(frame_env, "FRAME=%04d", frame);            putenv(frame_env); // can be used by external script
 	        printf("\n");
 	        printf("Environment variable: %s\n", winid_env);
@@ -63,16 +64,16 @@ public:
 static MyApp *G_app = 0;
 
 // init FLTK, set draw callback
-void init_FLTK(DrawCallback *cb)
+void Init_FLTK(DrawCallback *cb)
 {
-    G_app = new MyApp(FLTK_SCREEN_XMAX, FLTK_SCREEN_YMAX, "fltk");
-    G_app->show();
-    G_app->wait_for_expose();          // make sure window is mapped
-    Fl::flush();		// flush FLTK graphics before calling render cmd
+    G_app = new MyApp(FLTK_DEFAULT_XMAX, FLTK_DEFAULT_YMAX, "fltk");
     G_app->SetDrawCallback(cb);
+    G_app->show();
+    //XXX G_app->wait_for_expose();          // make sure window is mapped
+    //XXX Fl::flush();		// flush FLTK graphics before calling render cmd
 }
 
-void apploop_FLTK()
+void AppLoop_FLTK()
 {
     Fl::run();
 }
@@ -104,3 +105,6 @@ void SetPostRenderCommand_FLTK(const char *cmd)
 {
     if ( G_app ) G_app->SetPostRenderCommand(cmd);
 }
+
+int GetScreenWidth_FLTK()  { return G_app ? G_app->w() : FLTK_DEFAULT_XMAX; }
+int GetScreenHeight_FLTK() { return G_app ? G_app->h() : FLTK_DEFAULT_YMAX; }

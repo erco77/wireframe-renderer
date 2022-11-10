@@ -1,15 +1,16 @@
-OBJS=Matrix41.o Matrix44.o Point3D.o Triangle.o Quad.o Vector3D.o \
-	        TransformHandler.o Camera.o DrawableObject.o
+SHELL=/bin/sh
+OBJS=Matrix41.o Matrix44.o Point3D.o Triangle.o Quad.o \
+     TransformHandler.o Camera.o DrawableObject.o
 CXXFLAGS+=-g
 
 # DEFINE ONLY ONE RENDER DEVICE
 
 ### FLTK RENDER DEVICE
-FLTKDIR=/usr/local/src/fltk-1.4.x-git
-FLTKCONFIG=$(FLTKDIR)/fltk-config
-CXXFLAGS+=-DRENDER_FLTK `$(FLTKCONFIG) --cxxflags`
-RENDEROBJS=fltk.o
-RENDERLIBS=`$(FLTKCONFIG) --ldstaticflags`
+#FLTKDIR=/usr/local/src/fltk-1.4.x-git
+#FLTKCONFIG=$(FLTKDIR)/fltk-config
+#CXXFLAGS+=-DRENDER_FLTK `$(FLTKCONFIG) --cxxflags`
+#RENDEROBJS=fltk.o
+#RENDERLIBS=`$(FLTKCONFIG) --ldstaticflags`
 
 ### FLTK CAIRO RENDER DEVICE
 #FLTKDIR=/usr/local/src/fltk-1.4.x-git
@@ -27,12 +28,16 @@ RENDERLIBS=`$(FLTKCONFIG) --ldstaticflags`
 ### This renders ascii characters to plot pixels.
 ### For this to work at all, make a large console and use a tiny font
 ### to achieve a 600 x 150 "pixel" window
-#CXXFLAGS+=-DRENDER_VT100
-#RENDEROBJS+=vt100.o
+CXXFLAGS+=-DRENDER_VT100
+RENDEROBJS+=vt100.o
+RENDERLIBS=
+
+### OSCILLOSCOPE/WAV FILE RENDER DEVICE
+#CXXFLAGS+=-DRENDER_SCOPE
+#RENDEROBJS+=scope.o
 #RENDERLIBS=
 
 all: main
-	./main > out.plt
 
 #
 # The main 3D application
@@ -41,7 +46,8 @@ main: $(OBJS) $(RENDEROBJS) main.o
 	g++ $(CXXFLAGS) main.o $(OBJS) $(RENDEROBJS) $(RENDERLIBS) -o main
 
 # Screen rendering modules
-vt100.o: vt100.cpp
+scope.o: scope.cpp scope.h
+vt100.o: vt100.cpp vt100.h
 tek4010.o: tek4010.cpp tek4010.h
 fltk.o: fltk.cpp fltk.h
 fltkcairo.o: fltkcairo.cpp fltkcairo.h
@@ -52,7 +58,6 @@ Camera.o: Camera.cpp Camera.h
 Point3D.o: Point3D.cpp Point3D.h
 Matrix41.o: Matrix41.cpp Matrix41.h
 Matrix44.o: Matrix44.cpp Matrix44.h
-Vector3D.o: Vector3D.cpp Vector3D.h
 Triangle.o: Triangle.cpp Triangle.h
 DrawableObject.o: DrawableObject.cpp DrawableObject.h
 TransformHandler.o: TransformHandler.cpp TransformHandler.h
@@ -81,13 +86,17 @@ test-fltk: test-fltk.o $(RENDEROBJS)
 test-fltkcairo: $(RENDEROBJS) test-fltkcairo.o
 	g++ $(CXXFLAGS) test-fltkcairo.cpp $(RENDEROBJS) $(RENDERLIBS) -o test-fltkcairo
 
+# Test scope rendering
+test-scope: scope.o test-scope.cpp
+	g++ $(CXXFLAGS) test-scope.cpp scope.o -o test-scope
+
 #
 # Clean target
 #
 clean:
-	-rm $(OBJS) $(RENDEROBJS) 2> /dev/null
-	-rm main                  2> /dev/null
-	-rm test-Quad             2> /dev/null
-	-rm test-Triangle         2> /dev/null
-	-rm test-fltk             2> /dev/null
-	-rm *.o                   2> /dev/null
+	-/bin/rm -f $(OBJS) $(RENDEROBJS) 2> /dev/null
+	-/bin/rm -f main                  2> /dev/null
+	-/bin/rm -f test-Quad             2> /dev/null
+	-/bin/rm -f test-Triangle         2> /dev/null
+	-/bin/rm -f test-fltk             2> /dev/null
+	-/bin/rm -f *.o                   2> /dev/null
