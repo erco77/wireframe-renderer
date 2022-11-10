@@ -6,11 +6,11 @@ CXXFLAGS+=-g
 # DEFINE ONLY ONE RENDER DEVICE
 
 ### FLTK RENDER DEVICE
-#FLTKDIR=/usr/local/src/fltk-1.4.x-git
-#FLTKCONFIG=$(FLTKDIR)/fltk-config
-#CXXFLAGS+=-DRENDER_FLTK `$(FLTKCONFIG) --cxxflags`
-#RENDEROBJS=fltk.o
-#RENDERLIBS=`$(FLTKCONFIG) --ldstaticflags`
+FLTKDIR=/usr/local/src/fltk-1.4.x-git
+FLTKCONFIG=$(FLTKDIR)/fltk-config
+CXXFLAGS+=-DRENDER_FLTK `$(FLTKCONFIG) --cxxflags`
+RENDEROBJS=fltk.o
+RENDERLIBS=`$(FLTKCONFIG) --ldstaticflags`
 
 ### FLTK CAIRO RENDER DEVICE
 #FLTKDIR=/usr/local/src/fltk-1.4.x-git
@@ -28,9 +28,9 @@ CXXFLAGS+=-g
 ### This renders ascii characters to plot pixels.
 ### For this to work at all, make a large console and use a tiny font
 ### to achieve a 600 x 150 "pixel" window
-CXXFLAGS+=-DRENDER_VT100
-RENDEROBJS+=vt100.o
-RENDERLIBS=
+#CXXFLAGS+=-DRENDER_VT100
+#RENDEROBJS+=vt100.o
+#RENDERLIBS=
 
 ### OSCILLOSCOPE/WAV FILE RENDER DEVICE
 #CXXFLAGS+=-DRENDER_SCOPE

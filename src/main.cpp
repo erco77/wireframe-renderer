@@ -405,8 +405,8 @@ int main(int argc, char* args[])
 {
     Init_3D();         // Initialize 3D stuff
     Init_FLTK(draw);   // init fltk (creates window)
-//XXX    Redraw_FLTK(30.0); // enable redrawing (for animation) in FPS
-//XXX    SetPostRenderCommand_FLTK("./shoot");
+    Redraw_FLTK(30.0); // enable redrawing (for animation) in FPS
+//  SetPostRenderCommand_FLTK("./shoot");
     AppLoop_FLTK();    // FLTK uses an event loop for showing window + calling draw()
     return 0;
 }

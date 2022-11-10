@@ -40,7 +40,7 @@ public:
         Fl_Double_Window::draw();       // let window draw itself (black)
         fl_color(FL_WHITE);             // draw with white lines
         fl_color(0x40ff4000);           // oops, no, green
-	printf("fltk::draw() called, draw_cb is %p\n", _draw_cb);
+	//DEBUG printf("fltk::draw() called, draw_cb is %p\n", _draw_cb);
         if ( _draw_cb ) {     		// invoke caller's draw callback
 	    _draw_cb();
             static int frame = 0;
