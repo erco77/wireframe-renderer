@@ -20,23 +20,31 @@ void TransformHandler::rotateX(Point3D& p,  // point to be rotated
     p.xyz(result.x(), result.y(), result.z());      // return result in p
 }
 
+void TransformHandler::rotateX(Triangle& t,  // triangle to be rotated
+                               float angle)  // angle in radians
+{
+    rotateX(t.a(), angle);
+    rotateX(t.b(), angle);
+    rotateX(t.c(), angle);
+}
+
+void TransformHandler::rotateX(Quad& q,      // quad to be rotated
+                               float angle)  // angle in radians
+{
+    rotateX(q.a(), angle);
+    rotateX(q.b(), angle);
+    rotateX(q.c(), angle);
+    rotateX(q.d(), angle);
+}
+
 void TransformHandler::rotateObjectX(DrawableObject *dobj, float angle)
 {
     unsigned int i;
     for (i = 0; i < dobj->triangles()->size(); i++) {
-        Triangle *t = dobj->triangle(i);
-        // TODO: rotateX(t, angle)
-        rotateX(t->a(), angle);
-        rotateX(t->b(), angle);
-        rotateX(t->c(), angle);
+        rotateX(*dobj->triangle(i), angle);
     }
     for (i = 0; i < dobj->quads()->size(); i++) {
-        Quad *q = dobj->quad(i);
-        // TODO: rotateX(q, angle)
-        rotateX(q->a(), angle);
-        rotateX(q->b(), angle);
-        rotateX(q->c(), angle);
-        rotateX(q->d(), angle);
+        rotateX(*dobj->quad(i), angle);
     }
 }
 
@@ -110,9 +118,9 @@ void TransformHandler::rotateObjectZ(DrawableObject *dobj, float angle)
 void TransformHandler::scaleUniform(Point3D& p, float factor)
 {
     Matrix44 m44( factor,   0.0f,   0.0f, 0.0f,
-                  0.0f,   factor,   0.0f, 0.0f,
-                  0.0f,     0.0f, factor, 0.0f,
-                  0.0f,     0.0f,   0.0f, 1.0f );
+                    0.0f, factor,   0.0f, 0.0f,
+                    0.0f,   0.0f, factor, 0.0f,
+                    0.0f,   0.0f,   0.0f, 1.0f );
     Matrix41 result(p.x(), p.y(), p.z(), 1.0f);
     result.multiply(m44);                           // result = p x [ m44 ]
     p.xyz(result.x(), result.y(), result.z());      // return result in p

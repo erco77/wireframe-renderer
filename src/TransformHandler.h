@@ -12,6 +12,8 @@ public:
 
     // Note: angles are radians
     static void rotateX(Point3D& p, float angle);
+    static void rotateX(Triangle& t, float angle);
+    static void rotateX(Quad& q, float angle);
     static void rotateObjectX(DrawableObject *dobj, float angle);
     static void rotateY(Point3D& p, float angle);
     static void rotateObjectY(DrawableObject *dobj, float angle);
