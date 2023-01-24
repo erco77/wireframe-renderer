@@ -1,6 +1,6 @@
 // vim: autoindent tabstop=8 shiftwidth=4 expandtab softtabstop=4
 
-// tek40xx screen is:
+// tek40xx screen is 1024 x 800:
 //
 //  0,779  __________________________  1023,779
 //        |                          |
@@ -9,6 +9,8 @@
 //        |                          |
 //        |                          |
 //    0,0 |__________________________| 1023,0
+//       /
+//    origin
 //
 
 #include <stdio.h>

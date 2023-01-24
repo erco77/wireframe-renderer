@@ -24,12 +24,18 @@ static void DrawLine(int x1, int y1,
                      int step,
                      void (*drawfunc)(int,int)) // function to output x,y values
 {
+    // Plot a single point?
+    if ( x1 == x2 && y1 == y2 ) {
+	(*drawfunc)(x1, y1);
+	return;
+    }
+
     long x,y,xInc,yInc;
     long dx,dy;
     int swap;
     int skip = 0;
 
-    //DEBUG fprintf(stderr, "Draw %d,%d -> %d,%d step %d\n", x1,y1, x2,y2, step);
+    //DEBUG fprintf(stderr, "Draw %d,%d -> %d,%d step %d (dx=%ld dy=%ld)\n", x1,y1, x2,y2, step, dx, dy);
 
     dx = ( x2 - x1 );
     dy = ( y2 - y1 );

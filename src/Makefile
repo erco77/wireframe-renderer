@@ -6,7 +6,7 @@ CXXFLAGS+=-g
 # DEFINE ONLY ONE RENDER DEVICE
 
 ### FLTK RENDER DEVICE
-FLTKDIR=/usr/local/src/fltk-1.4.x-git
+FLTKDIR=/usr/local/src/fltk-1.4.x.git/build
 FLTKCONFIG=$(FLTKDIR)/fltk-config
 CXXFLAGS+=-DRENDER_FLTK `$(FLTKCONFIG) --cxxflags`
 RENDEROBJS=fltk.o
