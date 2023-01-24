@@ -126,7 +126,7 @@ static void DrawLine(int x1, int y1,
     if (ax>ay) {                /* x dominant */
         d = ay-(ax>>1);
         for (;;) {
-            if ( ++skip % step == 0 ) drawfunc(x, y);
+            if ( ++skip % step == 0 || (x==x1&&y==y1) || (x==x2&&y==y2)) drawfunc(x, y);
             if (x==x2) return;
             if (d>=0) {
                 y += sy;
@@ -138,7 +138,7 @@ static void DrawLine(int x1, int y1,
     } else {                      /* y dominant */
         d = ax-(ay>>1);
         for (;;) {
-            if ( ++skip % step == 0 ) drawfunc(x, y);
+            if ( ++skip % step == 0 || (x==x1&&y==y1) || (x==x2&&y==y2)) drawfunc(x, y);
             if (y==y2) return;
             if (d>=0) {
                 x += sx;

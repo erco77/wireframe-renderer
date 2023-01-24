@@ -60,8 +60,8 @@ void draw()
     }
 
     // Draw "X"
-    DrawLine(0,     0, 65535, 65535);
-    DrawLine(0, 65535, 65535, 0);
+    DrawLine(0,     0, 65534, 65534);
+    DrawLine(0, 65534, 65534, 0);
 
     // Draw rectangle around screen edge
     DrawLine(0,         0, 65534,     0);
